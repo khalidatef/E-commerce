@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css" />
+  <link rel="stylesheet" href="css/all.min.css" />
+  <link href="css/cart.css" rel="stylesheet" />
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container position-relative">
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active white fw-bold" aria-current="page" href="index.html"><i
+                class="fa-solid fa-bag-shopping"></i> ShopHub</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link white" href="products.html">Products</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link white" href="cart.html">Cart</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="navbar-brand position-absolute top-50 start-50 translate-middle" href="#">Mixtas</a>
+
+      <div class="icons d-flex align-items-center gap-3">
+        <a href="login.html">
+          <i class="fa-solid fa-user"></i>
+          <span>Login</span>
+        </a>
+        <a href="cart.html" class="position-relative">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span>Cart</span>
+          <span class="cart-count badge bg-danger position-absolute top-0 start-100 translate-middle"
+            style="display: none;">0</span>
+        </a>
+      </div>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse " data-bs-target="#navbarNav">
+        <span><i class="fa-solid fa-sliders white"></i></span>
+      </button>
+    </div>
+  </nav>
+  <div class="container">
+    <h1 class="text-center mb-5 mt-5 fw-bold head">Your Cart</h1>
+
+    <div id="cartContainer" class="row">
+    </div>
+
+    <div id="totalPrice">
+    </div>
+  </div>
+  <script src="js/all.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+
+</html>

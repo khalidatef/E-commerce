@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link href="css/login.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container page_1">
+      <div
+        class="form-body login d-flex justify-content-center align-items-center"
+      >
+        <form class="mx-auto" id="loginForm">
+          <h1 class="text-center mb-2 head">Login</h1>
+          <div class="mb-3">
+            <label for="userEmail" class="form-label">Email address</label>
+            <input
+              type="email"
+              class="form-control"
+              id="userEmail"
+              aria-describedby="emailHelp"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="userPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" id="userPassword" />
+          </div>
+          <button type="submit" class="btn btn-primary button w-100 mt-3">
+            Login
+          </button>
+          <div>
+            <p class="text-center mt-3">
+              Don't have an account? <a href="register.html"> Sign Up</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="js/all.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/login.js"></script>
+  </body>
+</html>

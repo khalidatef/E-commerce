@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link href="css/registeration.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container page_1">
+      <div
+        class="form-body w-75 d-flex justify-content-center align-items-center"
+      >
+        <div class="left-side">
+          <img
+            src="https://cdni.iconscout.com/illustration/premium/thumb/man-working-on-sign-up-page-design-14942780-12073963.png"
+            alt="register"
+            class="img-fluid"
+          />
+        </div>
+
+        <form class="mx-auto" id="signupForm">
+          <h1 class="text-center mb-2 head">SIGN UP</h1>
+
+          <div class="mb-3">
+            <label for="userName" class="form-label">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="userName"
+              placeholder="Enter your name"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="userEmail" class="form-label">Email address</label>
+            <input
+              type="email"
+              class="form-control"
+              id="userEmail"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="userPassword" class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="userPassword"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <div class="mb-3 form-check">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="isAdmin"
+            />
+            <label class="form-check-label" for="isAdmin">
+              Register as Admin
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary button w-100">
+            Sign Up
+          </button>
+
+          <div>
+            <p class="text-center mt-2">
+              Already have an account?
+              <a href="login.html">Login Here</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/all.min.js"></script>
+    <script src="js/registeration.js"></script>
+  </body>
+</html>
