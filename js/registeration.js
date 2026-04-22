@@ -3,17 +3,11 @@ var nameInput = document.getElementById("userName");
 var emailInput = document.getElementById("userEmail");
 var passwordInput = document.getElementById("userPassword");
 var isAdmin = document.getElementById("isAdmin");
-
-var usersList = [];
-
-if (localStorage.getItem("users") != null) {
-    usersList = JSON.parse(localStorage.getItem("users"));
-}
 //regular expression for email validation
-function validateEmail(email) {
+function validateEmail() {
    
 
-    let emailRegex = /^\w+@(gmail|yahoo|hotmail)\.com$/;
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     let emailValue = emailInput.value.trim();
       if (emailValue === "") {
     emailInput.classList.remove("is-invalid", "is-valid");
@@ -32,7 +26,7 @@ function validateEmail(email) {
 
 
 //regular expression for password validation
-function validatePassword(password) {
+function validatePassword() {
     let passwordRegex = /^\w{6,20}$/;
     let passwordValue = passwordInput.value.trim();
     if (passwordRegex.test(passwordValue)) {
@@ -49,7 +43,7 @@ function validatePassword(password) {
 }
 //regular expression for name validation
 function validateName() {
-  let nameRegex = /^\w{3,20}$/;
+  let nameRegex = /^[A-Za-z\s]{3,30}$/;
   let nameValue = nameInput.value.trim();
 
   if (nameRegex.test(nameValue)) {
@@ -62,8 +56,7 @@ function validateName() {
 }
 
 
-signupForm.addEventListener("submit", function (e) {
-
+signupForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     var name = nameInput.value.trim();
@@ -75,41 +68,35 @@ signupForm.addEventListener("submit", function (e) {
         return;
     }
 
-
-    //check if email already exists
-    var emailExists = false;
-    for (var i = 0; i < usersList.length; i++) {
-        if (usersList[i].email == email) {
-            emailExists = true;
-            break;
-        }
+    if (
+      !nameInput.classList.contains("is-valid") ||
+      !emailInput.classList.contains("is-valid") ||
+      !passwordInput.classList.contains("is-valid")
+    ) {
+      alert("Please enter valid account details.");
+      return;
     }
 
-    if (emailExists) {
-        alert("Email already exists");
-        return;
+    try {
+      const response = await window.appApi.request("/auth/register.php", {
+        method: "POST",
+        body: {
+          name: name,
+          email: email,
+          password: password,
+          is_admin: isAdmin.checked,
+        },
+      });
+
+      alert(response.message);
+      nameInput.value = "";
+      emailInput.value = "";
+      passwordInput.value = "";
+      isAdmin.checked = false;
+      window.location.href = "login.html";
+    } catch (error) {
+      alert(error.message);
     }
-    //add new user to the list
-    var newUser = {
-        name: name,
-        email: email,
-        password: password,
-        role: isAdmin.checked 
-    
-    };
-
-    usersList.push(newUser);
-    localStorage.setItem("users", JSON.stringify(usersList));
-
-    alert("Account created successfully");
-
-    // Clear the form fields after successful registration
-    nameInput.value = "";
-    emailInput.value = "";
-    passwordInput.value = "";
-
-    // Redirect to login page after successful registration
-    window.location.href = "login.html";
 });
 emailInput.addEventListener("input", validateEmail);
 passwordInput.addEventListener("input", validatePassword);

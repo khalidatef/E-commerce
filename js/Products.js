@@ -4,19 +4,20 @@ let products = document.getElementById("products");
 let searchProduct = document.getElementById("Search");
 let category = document.getElementById("Categories");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const navbarUser = document.getElementById("navbarUser");
-  const user = JSON.parse(localStorage.getItem("currentUser"));
-
-});
-
 async function getProducts() {
-  let response = await fetch("https://fakestoreapi.com/products", {
-    method: "GET",
-  });
-  let data = await response.json();
-  items = data;
-  displayProducts();
+  try {
+    let response = await window.appApi.request("/products.php", {
+      method: "GET",
+    });
+    items = response.products || [];
+    displayProducts();
+  } catch (error) {
+    products.innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-danger text-center">${error.message}</div>
+      </div>
+    `;
+  }
 }
 getProducts();
 function displayProducts() {
@@ -196,73 +197,53 @@ function showCategory() {
   products.innerHTML = cartona;
   addCartEventListeners()
 }
-document.addEventListener("DOMContentLoaded", () => {
-  const navbarUser = document.getElementById("navbarUser");
-  const user = JSON.parse(localStorage.getItem("currentUser"));
-
-  if (user && user.email) {
-    navbarUser.innerHTML = `
-      <span class="fw-bold white">Hi, ${user.email}</span>
-      <button class="btn btn-outline-light btn-sm" id="logoutBtn">Logout</button>
-      <a class="white" href="cart.html">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <span>Cart</span>
-      </a>
-    `;
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("currentUser");
-      window.location.href = "login.html";
-    });
-  } else {
-    navbarUser.innerHTML = `
-      <a class="white" href="login.html">
-        <i class="fa-solid fa-user"></i>
-        <span>Login</span>
-      </a>
-      <a class="white" href="cart.html">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <span>Cart</span>
-      </a>
-    `;
-  }
-});
-
 function addCartEventListeners() {
   const cartButtons = document.querySelectorAll('.add-to-cart-btn');
   cartButtons.forEach(button => {
-    button.addEventListener('click', function () {
+    button.addEventListener('click', async function () {
       const productId = parseInt(this.getAttribute('data-product-id'));
-      addToCart(productId);
+      await addToCart(productId);
     });
   });
 }
 
-function addToCart(productId) {
+async function addToCart(productId) {
   const product = items[productId];
   if (product) {
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const currentUser = window.appApi.getCurrentUser();
 
-    const existingItem = cart.find(item => item.id === product.id);
+    if (!currentUser) {
+      alert("Please log in before adding items to your cart.");
+      window.location.href = "login.html";
+      return;
+    }
 
-    if (existingItem) {
-      existingItem.quantity = (existingItem.quantity || 1) + 1;
-    } else {
-      cart.push({
-        ...product,
-        quantity: 1
+    try {
+      await window.appApi.request("/cart.php", {
+        method: "POST",
+        body: {
+          product_id: product.id,
+          quantity: 1
+        }
       });
+
+      showCartNotification();
+
+      if (window.cartFunctions && window.cartFunctions.updateCartCount) {
+        window.cartFunctions.updateCartCount();
+      } else {
+        window.appApi.refreshCartCount();
+      }
+    } catch (error) {
+      if (error.status === 401) {
+        window.appApi.clearCurrentUser();
+        alert("Your session has expired. Please log in again.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      alert(error.message);
     }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    showCartNotification();
-
-    if (window.cartFunctions && window.cartFunctions.updateCartCount) {
-      window.cartFunctions.updateCartCount();
-    }
-
-    console.log('Cart updated:', cart);
   }
 }
 

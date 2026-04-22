@@ -1,7 +1,32 @@
 const cartContainer = document.getElementById("cartContainer");
 const totalPriceDiv = document.getElementById("totalPrice");
 
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let cart = [];
+
+async function fetchCart() {
+  try {
+    const response = await window.appApi.request("/cart.php");
+    cart = response.cart || [];
+    displayCart();
+    updateCartCount();
+  } catch (error) {
+    if (error.status === 401) {
+      cart = [];
+      cartContainer.innerHTML = `
+        <div class="col-12">
+          <div class="alert alert-warning text-center py-4">
+            Please <a href="login.html" class="alert-link">log in</a> to view your cart.
+          </div>
+        </div>
+      `;
+      totalPriceDiv.innerHTML = "";
+      updateCartCount();
+      return;
+    }
+
+    showNotification(error.message, "danger");
+  }
+}
 
 function displayCart() {
   cartContainer.innerHTML = "";
@@ -113,74 +138,105 @@ function updateCheckoutSection(subtotal) {
 
 function increaseQuantity(index) {
   if (cart[index]) {
-    cart[index].quantity = (cart[index].quantity || 1) + 1;
-    saveCart();
-    displayCart();
+    updateQuantity(cart[index].id, (cart[index].quantity || 1) + 1);
   }
 }
 
 function decreaseQuantity(index) {
   if (cart[index] && (cart[index].quantity || 1) > 1) {
-    cart[index].quantity = (cart[index].quantity || 1) - 1;
-    saveCart();
-    displayCart();
+    updateQuantity(cart[index].id, (cart[index].quantity || 1) - 1);
   }
 }
 
-function updateQuantity(index, newQuantity) {
+async function updateQuantity(productId, newQuantity) {
   const quantity = parseInt(newQuantity);
-  if (cart[index] && quantity > 0 && quantity <= 99) {
-    cart[index].quantity = quantity;
-    saveCart();
-    displayCart();
+
+  if (quantity > 0 && quantity <= 99) {
+    try {
+      await window.appApi.request("/cart.php", {
+        method: "PATCH",
+        body: {
+          product_id: productId,
+          quantity: quantity,
+        },
+      });
+      await fetchCart();
+    } catch (error) {
+      showNotification(error.message, "danger");
+    }
   } else if (quantity <= 0) {
-    removeFromCart(index);
+    removeFromCartByProductId(productId);
   }
 }
 
 function removeFromCart(index) {
+  const item = cart[index];
+  if (!item) {
+    return;
+  }
+
+  removeFromCartByProductId(item.id);
+}
+
+async function removeFromCartByProductId(productId) {
   if (confirm('Are you sure you want to remove this item from your cart?')) {
-    cart.splice(index, 1);
-    saveCart();
-    displayCart();
-    // showNotification('Item removed from cart', 'warning');
+    try {
+      await window.appApi.request("/cart.php", {
+        method: "DELETE",
+        body: { product_id: productId },
+      });
+      await fetchCart();
+    } catch (error) {
+      showNotification(error.message, "danger");
+    }
   }
 }
 
 function clearCart() {
   if (cart.length === 0) {
-    // showNotification('Cart is already empty', 'info');
     return;
   }
   
   if (confirm('Are you sure you want to clear your entire cart?')) {
-    cart = [];
-    saveCart();
-    displayCart();
-    // showNotification('Cart cleared successfully', 'success');
+    Promise.all(
+      cart.map((item) =>
+        window.appApi.request("/cart.php", {
+          method: "DELETE",
+          body: { product_id: item.id },
+        })
+      )
+    )
+      .then(fetchCart)
+      .catch((error) => showNotification(error.message, "danger"));
   }
 }
 
-function saveCart() {
-  localStorage.setItem("cart", JSON.stringify(cart));
-}
-
-function processCheckout(finalTotal) {
+async function processCheckout(finalTotal) {
   if (cart.length === 0) {
     showNotification('Your cart is empty', 'warning');
     return;
   }
   
-  // For now, just show a success message
-  // In a real application, this would redirect to a checkout page
-  showNotification(`Order placed successfully! Total: $${finalTotal.toFixed(2)}`, 'success');
-  
-  // Clear cart after successful checkout
-  setTimeout(() => {
-    cart = [];
-    saveCart();
-    displayCart();
-  }, 2000);
+  const selectedShipping = document.querySelector('input[name="shippingOption"]:checked');
+  const shippingMethod = selectedShipping && selectedShipping.value === "9.90" ? "delivery" : "pickup";
+
+  try {
+    const response = await window.appApi.request("/checkout.php", {
+      method: "POST",
+      body: { shipping_method: shippingMethod },
+    });
+
+    showNotification(`Order #${response.order.id} placed successfully! Total: $${response.order.total.toFixed(2)}`, 'success');
+    await fetchCart();
+  } catch (error) {
+    if (error.status === 401) {
+      window.appApi.clearCurrentUser();
+      window.location.href = "login.html";
+      return;
+    }
+
+    showNotification(error.message, "danger");
+  }
 }
 
 // Function to handle shipping option changes
@@ -227,8 +283,7 @@ function updateCartCount() {
 }
 
 // Initialize cart display
-displayCart();
-updateCartCount();
+fetchCart();
 
 // Export functions for use in other files
 window.cartFunctions = {
@@ -236,35 +291,3 @@ window.cartFunctions = {
   updateCartCount,
   showNotification
 };
-
-document.addEventListener("DOMContentLoaded", () => {
-  const navbarUser = document.getElementById("navbarUser");
-  const user = JSON.parse(localStorage.getItem("currentUser"));
-
-  if (user && user.email) {
-    navbarUser.innerHTML = `
-      <span class="fw-bold white">Hi, ${user.email}</span>
-      <button class="btn btn-outline-light btn-sm" id="logoutBtn">Logout</button>
-      <a class="white" href="cart.html">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <span>Cart</span>
-      </a>
-    `;
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("currentUser");
-      window.location.href = "login.html";
-    });
-  } else {
-    navbarUser.innerHTML = `
-      <a class="white" href="login.html">
-        <i class="fa-solid fa-user"></i>
-        <span>Login</span>
-      </a>
-      <a class="white" href="cart.html">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <span>Cart</span>
-      </a>
-    `;
-  }
-});

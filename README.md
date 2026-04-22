@@ -1,3 +1,12 @@
 # E-commerce
 
-An E-commerce web application built with HTML, CSS, JavaScript, and TypeScript, featuring a responsive user interface and interactive product browsing. The project includes Login and Sign Up functionality with basic form validation and integrates a static API to fetch and display product data.
+An e-commerce web application built with HTML, CSS, JavaScript, PHP, and MySQL.
+
+The frontend now uses local PHP APIs for:
+
+- user registration and login
+- product listing
+- server-side cart management
+- checkout and order creation
+
+Backend setup details are in [backend/README.md](/Users/khalidatef/Documents/E-commerce/backend/README.md:1).
